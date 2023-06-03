@@ -1,3 +1,37 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.App {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+main {
+    margin-top: 140px;
+}
+
+.shimmer-bg {
+    animation : shimmer 2s infinite linear;
+    background: linear-gradient(to right, #e5e5e5 4%, #dadada 25%, #eaeaea 36%);
+    background-size: 1000px 100%;
+}
+
+.shimmer-blur {
+    filter: blur(2px);
+}
+
+.shimmer-blured {
+    filter: blur(5px);
+}
+
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}

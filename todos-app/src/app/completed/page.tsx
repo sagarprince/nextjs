@@ -1,9 +1,11 @@
 import { fetchTodos, toggleTodo, deleteTodo, updateTodoName } from '@/services';
 import Todos from '@/components/Todos';
 
-export default async function Home() {
-    const { todos } = await fetchTodos({});
-
+export default async function ActiveTodos() {
+    const { todos } = await fetchTodos({
+        status: 'completed'
+    });
+   
     return (
         <Todos 
             todos={todos} 
