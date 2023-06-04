@@ -3,3 +3,10 @@ export type Todo = {
     name: string;
     complete: boolean;
 }
+
+export type Filter = {
+    key: number;
+    path: string;
+    label: string;
+    count?: number;
+}

@@ -4,9 +4,9 @@ import TodoCard from '@/components/TodoCard';
 
 const Todos: React.FC<{ 
         todos: Todo[], 
-        toggleTodo?: (id: string, complete: boolean) => void,
-        updateTodo?: (id: string, name: string) => void,
-        deleteTodo?: (id: string) => void
+        toggleTodo?: (id: string, complete: boolean) => Promise<void>,
+        updateTodo?: (id: string, name: string) => Promise<void>,
+        deleteTodo?: (id: string) => Promise<void>
     }> = ({ todos, toggleTodo, updateTodo, deleteTodo }) => {
     return (
         <ul className={styles.todos}>

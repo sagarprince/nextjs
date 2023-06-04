@@ -17,7 +17,6 @@ export async function GET(request: Request) {
     }
   }
   const args = status && argsMap[status] || {};
-  console.log(args);
   const todos = await prisma.todo.findMany(args);
 
   return NextResponse.json({ todos });

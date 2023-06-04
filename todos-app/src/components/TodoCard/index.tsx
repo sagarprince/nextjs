@@ -3,16 +3,14 @@
 import styles from './TodoCard.module.scss';
 import { Todo } from '@/types'
 import { classNames } from '@/utils';
-import { useRouter } from 'next/navigation';
 import { ChangeEvent, memo, useCallback, useEffect, useRef, useState } from 'react';
 
 const TodoCard: React.FC<{
     todo: Todo,
-    toggleTodo?: (id: string, complete: boolean) => void,
-    updateTodo?: (id: string, name: string) => void,
-    deleteTodo?: (id: string) => void
+    toggleTodo?: (id: string, complete: boolean) => Promise<void>,
+    updateTodo?: (id: string, name: string) => Promise<void>,
+    deleteTodo?: (id: string) => Promise<void>
 }> = ({ todo, toggleTodo, updateTodo, deleteTodo }) => {
-    const router = useRouter();
     const [isCompleted, setCompleted] = useState(false);
     const [todoName, setTodoName] = useState('');
     const [isEditable, setEditable] = useState(false);
@@ -40,7 +38,6 @@ const TodoCard: React.FC<{
         try {
             setCompleted(e.target.checked);
             toggleTodo && await toggleTodo(todo.id, e.target.checked);
-            router.refresh();
         } catch (e) {
             console.log(e);
         }
@@ -51,7 +48,6 @@ const TodoCard: React.FC<{
             const todoName: any = data.get('name') ?.valueOf();
             if (todoName) {
                 updateTodo && await updateTodo(todo.id, todoName);
-                router.refresh();
             } else {
                 setEditable(false);
                 setTodoName(todo.name);
@@ -64,7 +60,6 @@ const TodoCard: React.FC<{
     const onDeleteTodo = useCallback(async () => {
         try {
             deleteTodo && await deleteTodo(todo.id);
-            router.refresh();
         } catch (e) {
             console.log(e);
         }

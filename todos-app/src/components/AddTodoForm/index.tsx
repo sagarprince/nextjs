@@ -2,12 +2,10 @@
 
 import React, { ChangeEvent, useCallback, useState } from "react";
 import styles from './AddTodoForm.module.scss';
-import { useRouter } from 'next/navigation';
 
 
 const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<void> }> = ({ addTodo }) => {
     const [todoName, setTodoName] = useState('');
-    const router = useRouter();
 
     const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setTodoName(event.target.value);
@@ -17,7 +15,6 @@ const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<void> }> = ({
         try {
             await addTodo(data);
             setTodoName('');
-            router.refresh();
         } catch (e) {
             console.log(e);
         }

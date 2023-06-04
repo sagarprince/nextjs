@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import AddTodoForm from '@/components/AddTodoForm';
 import { addNewTodo } from '@/services';
+import { revalidateTag } from 'next/cache';
 
 async function addTodo(data: FormData) {
     'use server';
@@ -10,7 +11,6 @@ async function addTodo(data: FormData) {
         throw new Error('Please enter a todo name.');
     }
 
-    // await prisma.todo.create({ data: { name: todoName, complete: false } });
     await addNewTodo({
         todoName
     });

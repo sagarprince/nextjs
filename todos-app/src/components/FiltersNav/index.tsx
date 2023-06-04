@@ -1,47 +1,22 @@
 "use client"
 
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment } from 'react';
 import styles from './FiltersNav.module.scss';
 import { classNames } from '@/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Filter } from '@/types';
 
-interface Filter {
-    key: number;
-    path: string;
-    label: string;
-}
-
-const FiltersNav: React.FC = () => {
+const FiltersNav: React.FC<{ filters: Filter[] }> = ({ filters }) => {
     const pathName = usePathname();
-
-    const filters: Filter[] = useMemo(() => {
-        return [
-            {
-                key: 1,
-                path: '/',
-                label: 'All',
-            },
-            {
-                key: 2,
-                path: '/active',
-                label: 'Active',
-            },
-            {
-                key: 3,
-                path: '/completed',
-                label: 'Completed',
-            },
-        ];
-    }, []);
 
     return (
         <div className={classNames('tabs tabs-boxed', styles.filters)}>
-            {filters.map((filter: any) => {
+            {filters.map((filter) => {
                 return (
                     <Fragment key={filter.key}>
                         <Link className={`tab${(pathName == filter.path ? ' tab-active' : '')}`} href={filter.path}>
-                            {filter.label} (0)
+                            {filter.label} ({filter.count || 0})
                         </Link>
                     </Fragment>
                 )
