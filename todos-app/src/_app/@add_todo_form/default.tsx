@@ -16,6 +16,6 @@ async function addTodo(data: FormData) {
 
 export default function() {
     return (
-        <AddTodoForm addTodo={addTodo} />
+        <AddTodoForm />
     );
 }

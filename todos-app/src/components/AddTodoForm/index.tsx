@@ -1,30 +1,70 @@
 "use client"
 
-import React, { ChangeEvent, useCallback, useState } from "react";
+import React, { ChangeEvent, FormEvent, useCallback, useState } from "react";
 import styles from './AddTodoForm.module.scss';
-import { useRouter } from 'next/navigation';
+import { Todo } from '@/types';
+import { filters } from '@/constants';
+import { usePathname } from 'next/navigation';
+import { API, fetcher, useTodos } from '@/hooks/useTodos';
 
-
-const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<void> }> = ({ addTodo }) => {
+const AddTodoForm: React.FC = () => {
     const [todoName, setTodoName] = useState('');
-    const router = useRouter();
+    const pathName = usePathname();
+    const filter = filters.find((filter) => filter.path === pathName);
+    const key = filter && filter.path !== '/completed' && filter.dataKey || API;
+    const { mutate } = useTodos(key, fetcher);
+
+    const addTodo = useCallback(async (data: any) => {
+        const response = await fetcher(API, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        const todo = await response;
+        return todo;
+    }, [fetcher]);
 
     const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setTodoName(event.target.value);
     }, []);
 
-    const onAddTodo = useCallback(async (data: FormData) => {
+    const onAddTodo = useCallback(async (ev: FormEvent) => {
+        ev.preventDefault();
         try {
-            await addTodo(data);
-            setTodoName('');
-            router.refresh();
+            const newTodo: Todo = {
+                id: new Date().getTime(),
+                name: todoName,
+                complete: false
+            }
+            await mutate(addTodo({ todoName }), {
+                optimisticData: (currentData: any) => {
+                    const { todos } = currentData as { todos: Todo[] };
+                    setTodoName('');
+                    return {
+                        todos: [...todos, newTodo]
+                    };
+                },
+                rollbackOnError: true,
+                populateCache: (addedTodo: Todo, currentData: any) => {
+                    const { todos } = currentData as { todos: Todo[] };
+                    const updatedTodos = [...todos, newTodo];
+                    return {
+                        todos: [...updatedTodos.map((todo) => {
+                            if (todo.id === newTodo.id) {
+                                todo = { ...addedTodo };
+                            }
+                            return todo;
+                        })]
+                    };
+                },
+                revalidate: false
+            });
         } catch (e) {
             console.log(e);
         }
-    }, [addTodo]);
+    }, [todoName]);
 
     return (
-        <form action={onAddTodo} className={styles.add_todo_form}>
+        <form onSubmit={onAddTodo} className={styles.add_todo_form}>
             <input
                 type="text"
                 name='name'

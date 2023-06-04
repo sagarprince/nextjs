@@ -9,4 +9,5 @@ export type Filter = {
     path: string;
     label: string;
     count?: number;
+    dataKey?: any;
 }
