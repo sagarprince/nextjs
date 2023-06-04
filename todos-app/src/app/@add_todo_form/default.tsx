@@ -1,7 +1,5 @@
-import { prisma } from '@/lib/prisma';
 import AddTodoForm from '@/components/AddTodoForm';
 import { addNewTodo } from '@/services';
-import { revalidateTag } from 'next/cache';
 
 async function addTodo(data: FormData) {
     'use server';

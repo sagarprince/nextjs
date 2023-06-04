@@ -2,19 +2,21 @@ import styles from './Todos.module.scss';
 import { Todo } from '@/types';
 import TodoCard from '@/components/TodoCard';
 
-const Todos: React.FC<{ 
-        todos: Todo[], 
-        toggleTodo?: (id: string, complete: boolean) => Promise<void>,
-        updateTodo?: (id: string, name: string) => Promise<void>,
-        deleteTodo?: (id: string) => Promise<void>
-    }> = ({ todos, toggleTodo, updateTodo, deleteTodo }) => {
+const Todos: React.FC<{
+    todos: Todo[],
+    isLoading?: boolean,
+    toggleTodo?: (id: string, complete: boolean) => Promise<void>,
+    updateTodo?: (id: string, name: string) => Promise<void>,
+    deleteTodo?: (id: string) => Promise<void>
+}> = ({ todos, isLoading, toggleTodo, updateTodo, deleteTodo }) => {
     return (
         <ul className={styles.todos}>
             {todos.map((todo) => {
-                return <TodoCard 
-                    todo={todo} 
-                    toggleTodo={toggleTodo} 
-                    updateTodo={updateTodo} 
+                return <TodoCard
+                    todo={todo}
+                    isLoading={isLoading}
+                    toggleTodo={toggleTodo}
+                    updateTodo={updateTodo}
                     deleteTodo={deleteTodo} />
             })}
         </ul>

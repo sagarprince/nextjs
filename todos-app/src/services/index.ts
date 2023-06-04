@@ -31,7 +31,7 @@ export async function fetchTodosCount({ status = '' }: { status?: string }): Pro
 
     const response = await customFetch('todos/count', params, {
         next: {
-            tags: ['todosCount'],
+            tags: ['todos'],
             revalidate: 60
         }
     });
@@ -56,8 +56,7 @@ export async function addNewTodo({ todoName }: { todoName: string }): Promise<an
         throw new Error('Error while adding todo.');
     }
 
-    revalidateTag('todos');
-    revalidateTag('todosCount');
+    // revalidateTag('todos');
 
     return await response.json();
 }
@@ -68,12 +67,14 @@ export async function updateTodo({ id, ...rest }: { id: string, [key: string]: a
         body: JSON.stringify({
             id,
             ...rest
-        })
+        }),
     });
 
     if (!response.ok) {
         throw new Error('Error while updating todo.');
     }
+
+    // revalidateTag('todos');
 
     return await response.json();
 }
@@ -81,27 +82,19 @@ export async function updateTodo({ id, ...rest }: { id: string, [key: string]: a
 export async function toggleTodo(id: string, complete: boolean): Promise<any> {
     "use server"
 
-    const response = await updateTodo({
+    return await updateTodo({
         id,
         complete
     });
-
-    revalidateTag('todos');;
-
-    return response;
 }
 
 export async function updateTodoName(id: string, name: string): Promise<any> {
     "use server"
 
-    const response = await updateTodo({
+    return await updateTodo({
         id,
         name
     });
-
-    revalidateTag('posts');
-
-    return response;
 }
 
 export async function deleteTodo(id: string): Promise<any> {
@@ -115,7 +108,7 @@ export async function deleteTodo(id: string): Promise<any> {
         throw new Error('Error while deleting todo.');
     }
 
-    revalidateTag('todos');
+    // revalidateTag('todos');
 
     return await response.json();
 }

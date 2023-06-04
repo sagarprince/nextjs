@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -32,7 +33,7 @@ export async function PUT(request: Request) {
   const { id, ...rest } = await request.json();
   console.log(id, rest);
   const todo = await prisma.todo.update({ where: { id }, data: { ...rest } });
-  return NextResponse.json({ todo });
+  return NextResponse.json({ todo, revalidated: true });
 }
 
 export async function DELETE(request: Request) {
