@@ -1,5 +1,6 @@
 import { customFetch, CustomFetchParams } from '@/lib/fetch';
 import useSWR from 'swr';
+import useSWRMutation from 'swr/mutation';
 
 export const fetcher = async (...args: CustomFetchParams): Promise<any> => {
     const res = await customFetch(...args);

@@ -6,22 +6,30 @@ import { Todo } from '@/types';
 import { filters } from '@/constants';
 import { usePathname } from 'next/navigation';
 import { API, fetcher, useTodos } from '@/hooks/useTodos';
+import useSWRMutation from 'swr/mutation';
+
+const addTodo = async (url: string, { arg }: { arg: { todoName: string } }) => {
+    const response = await fetcher(API, {
+        method: 'POST',
+        body: JSON.stringify(arg)
+    });
+    return await response;
+}
 
 const AddTodoForm: React.FC = () => {
     const [todoName, setTodoName] = useState('');
     const pathName = usePathname();
     const filter = filters.find((filter) => filter.path === pathName);
     const key = filter && filter.path !== '/completed' && filter.dataKey || API;
-    const { mutate } = useTodos(key, fetcher);
+    const { trigger, isMutating } = useSWRMutation(key, addTodo);
 
-    const addTodo = useCallback(async (data: any) => {
-        const response = await fetcher(API, {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
-        const todo = await response;
-        return todo;
-    }, [fetcher]);
+    // const addTodo = useCallback(async (data: any) => {
+    //     const response = await fetcher(API, {
+    //         method: 'POST',
+    //         body: JSON.stringify(data)
+    //     });
+    //     return await response;
+    // }, [fetcher]);
 
     const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setTodoName(event.target.value);
@@ -35,7 +43,30 @@ const AddTodoForm: React.FC = () => {
                 name: todoName,
                 complete: false
             }
-            await mutate(addTodo({ todoName }), {
+            // await mutate(addTodo({ todoName }), {
+            //     optimisticData: (currentData: any) => {
+            //         const { todos } = currentData as { todos: Todo[] };
+            //         setTodoName('');
+            //         return {
+            //             todos: [...todos, newTodo]
+            //         };
+            //     },
+            //     rollbackOnError: true,
+            //     populateCache: (addedTodo: Todo, currentData: any) => {
+            //         const { todos } = currentData as { todos: Todo[] };
+            //         const updatedTodos = [...todos, newTodo];
+            //         return {
+            //             todos: [...updatedTodos.map((todo) => {
+            //                 if (todo.id === newTodo.id) {
+            //                     todo = { ...addedTodo };
+            //                 }
+            //                 return todo;
+            //             })]
+            //         };
+            //     },
+            //     revalidate: false
+            // });
+            await trigger({ todoName }, {
                 optimisticData: (currentData: any) => {
                     const { todos } = currentData as { todos: Todo[] };
                     setTodoName('');

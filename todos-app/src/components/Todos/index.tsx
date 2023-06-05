@@ -3,8 +3,9 @@ import styles from './Todos.module.scss';
 import { Todo } from '@/types';
 import { filters } from '@/constants';
 import { usePathname } from 'next/navigation';
-import { API, fetcher, useTodos } from '@/hooks/useTodos';
+import { ACTIVE_TODOS_API, API, COMPLETE_TODOS_API, fetcher, useTodos } from '@/hooks/useTodos';
 import TodoCard from '@/components/TodoCard';
+import { preload } from 'swr';
 
 const Todos: React.FC<{
     todos: Todo[],
@@ -14,6 +15,14 @@ const Todos: React.FC<{
     const filter = filters.find((filter) => filter.path === pathName);
     const key = filter && filter.dataKey || API;
     const { mutate } = useTodos(key, fetcher);
+
+    const preloadData = useCallback(() => {
+        const preloadPaths = filters.filter((item) => item.path !== pathName);
+        console.log(preloadPaths);
+        preloadPaths.forEach((filter) => {
+            preload(filter.dataKey, fetcher);
+        });
+    }, []);
 
     const updateTodo = useCallback(async ({ id, ...rest }: { id: string, [key: string]: any; }) => {
         const response = await fetcher(API, {
@@ -48,6 +57,7 @@ const Todos: React.FC<{
                 rollbackOnError: true,
                 populateCache: (updatedTodo: Todo, currentData: any) => {
                     const { todos } = currentData as { todos: Todo[] };
+                    preloadData();
                     return {
                         todos: pathName === '/' ? [...todos.map((todo) => {
                             if (todo.id === updatedTodo.id) return { ...updatedTodo };
@@ -83,6 +93,7 @@ const Todos: React.FC<{
                 rollbackOnError: true,
                 populateCache: (updatedTodo: Todo, currentData: any) => {
                     const { todos } = currentData as { todos: Todo[] };
+                    preloadData();
                     return {
                         todos: [...todos.map((todo) => {
                             if (todo.id === updatedTodo.id) return { ...updatedTodo };
@@ -116,6 +127,7 @@ const Todos: React.FC<{
                 rollbackOnError: true,
                 populateCache: (_, currentData: any) => {
                     const { todos } = currentData as { todos: Todo[] };
+                    preloadData();
                     return {
                         todos: [...todos.filter((todo) => todo.id !== id)]
                     }
