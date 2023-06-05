@@ -17,6 +17,7 @@
             margin-right: 10px;
             border-color: #828282;
             border-width: 2px;
+            animation: none;
         }
 
         &__text {
@@ -55,6 +56,8 @@
         width: 2rem;
         height: 2rem;
         min-height: auto;
+        transition: none;
+        animation: none;
 
         svg {
             width: 1.35em;

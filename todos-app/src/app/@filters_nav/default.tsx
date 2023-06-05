@@ -3,15 +3,7 @@ import { fetchTodosCount } from '@/services';
 import { Filter } from '@/types';
 import { Suspense } from 'react';
 
-export default async function() {
-    const todosStatus = ['', 'active', 'completed'];
-
-    const promises = Promise.all(todosStatus.map((status) => {
-        return fetchTodosCount({
-            status
-        });
-    }));
-
+export default function FiltersNavigation() {
     const filters: Filter[] = [
         {
             key: 1,
@@ -36,20 +28,27 @@ export default async function() {
     return (
         <Suspense fallback={<><FiltersNav filters={filters} /></>}>
             {/* @ts-expect-error Async Server Component */}
-            <AsyncFiltersNav promises={promises} filters={filters} />
+            <AsyncFiltersNav filters={filters} />
         </Suspense>
     );
 }
 
 // Albums Component
-async function AsyncFiltersNav({ promises, filters }: { promises: Promise<any[]>, filters: Filter[] }) {
-    const counts = await promises;
- 
-    counts.forEach(({ count }, i) => {
-        filters[i].count = count;
+async function AsyncFiltersNav({ filters }: { filters: Filter[] }) {
+    const { allCount, activeCount, completedCount } = await fetchTodosCount();
+
+    const countMap: Record<number, any> = {
+        1: allCount,
+        2: activeCount,
+        3: completedCount
+    };
+
+    const _filters = [...filters].map((filter) => {
+        filter.count = countMap[filter.key];
+        return filter;
     });
-   
+
     return (
-        <FiltersNav filters={filters} />
+        <FiltersNav filters={_filters} />
     );
 }

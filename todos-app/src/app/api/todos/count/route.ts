@@ -1,22 +1,23 @@
 import { prisma } from '@/lib/prisma';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const argsMap: any = {
-        'active': {
-            where: {
-                complete: false
+export async function GET(request: NextRequest) {
+    const origin = request.headers.get('origin')
+    const promises = ['all', 'active', 'completed'].map((v) => {
+        const args = {
+            where: v === 'all' ? undefined : {
+                complete: v === 'active' ? false : true
             }
-        },
-        'completed': {
-            where: {
-                complete: true
-            }
+        };
+        return prisma.todo.count(args);
+    });
+
+    const [allCount, activeCount, completedCount] = await Promise.all(promises);
+
+    return new NextResponse(JSON.stringify({ allCount, activeCount, completedCount }), {
+        headers: {
+            'Access-Control-Allow-Origin': origin || "*",
+            'Content-Type': 'application/json',
         }
-    }
-    const args = status && argsMap[status] || {};
-    const count = await prisma.todo.count(args);
-    return NextResponse.json({ count });
+    });
 }

@@ -1,12 +1,14 @@
 "use client"
 
-import React, { ChangeEvent, useCallback, useState } from "react";
+import React, { ChangeEvent, useCallback, useState, useTransition } from "react";
 import styles from './AddTodoForm.module.scss';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 
 const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<void> }> = ({ addTodo }) => {
     const [todoName, setTodoName] = useState('');
+    const [isPending, startTransition] = useTransition();
     const router = useRouter();
 
     const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
@@ -17,11 +19,14 @@ const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<void> }> = ({
         try {
             await addTodo(data);
             setTodoName('');
-            router.refresh();
-        } catch (e) {
-            console.log(e);
+            startTransition(() => {
+                router.refresh();
+                toast('New todo added successfully.');
+            });
+        } catch (e: any) {
+            toast('Failed to add the new todo.');
         }
-    }, [addTodo]);
+    }, [addTodo, router]);
 
     return (
         <form action={onAddTodo} className={styles.add_todo_form}>
@@ -34,7 +39,7 @@ const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<void> }> = ({
                 onChange={handleChange}
                 autoComplete='off'
             />
-            <button type="submit" disabled={!todoName}
+            <button type="submit" disabled={!todoName || isPending}
                 className="btn btn-active btn-accent w-64 rounded-full">Add</button>
         </form>
     );

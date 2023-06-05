@@ -14,7 +14,7 @@ async function addTodo(data: FormData) {
     });
 }
 
-export default function() {
+export default function AddTodo() {
     return (
         <AddTodoForm addTodo={addTodo} />
     );

@@ -2,8 +2,6 @@
 
 import React, { ReactNode, useCallback, useEffect, useRef } from "react";
 import styles from './Header.module.scss';
-import AddTodoForm from '../AddTodoForm';
-import FiltersNav from '../FiltersNav';
 
 const Header: React.FC<{ children: ReactNode}> = ({ children }) => {
     const headerRef = useRef<HTMLInputElement>(null);
@@ -29,12 +27,10 @@ const Header: React.FC<{ children: ReactNode}> = ({ children }) => {
         return () => {
             window.removeEventListener("scroll", handleScroll);
         }
-    }, [headerRef, handleScroll])
+    }, [headerRef, handleScroll, handleHeader])
 
     return (
         <header className={styles.header} ref={headerRef}>
-            {/* <AddTodoForm />
-            <FiltersNav /> */}
             {children}
         </header>
     );

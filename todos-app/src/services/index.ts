@@ -11,7 +11,7 @@ export async function fetchTodos({ status = '' }: { status?: string }): Promise<
     const response = await customFetch('todos', params, {
         next: {
             tags: ['todos'],
-            revalidate: 60
+            revalidate: 0
         }
     });
 
@@ -23,24 +23,16 @@ export async function fetchTodos({ status = '' }: { status?: string }): Promise<
     return await response.json();
 }
 
-export async function fetchTodosCount({ status = '' }: { status?: string }): Promise<any> {
-    const params: any = {};
-    if (status) {
-        params['status'] = status;
-    }
-
-    const response = await customFetch('todos/count', params, {
-        next: {
-            tags: ['todos'],
-            revalidate: 60
-        }
+export async function fetchTodosCount(): Promise<any> {
+    const response = await customFetch('todos/count', {}, {
+        cache: "no-cache",
     });
 
     if (!response.ok) {
         // This will activate the closest `error.js` Error Boundary
         throw new Error('Failed to fetch todos count.');
     }
-
+    
     return await response.json();
 }
 

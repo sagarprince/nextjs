@@ -4,45 +4,15 @@ import Todos from '@/components/Todos';
 import { Todo } from '@/types';
 
 export default function Loading() {
-    const todos: Todo[] = [
-        {
-            id: new Date().getTime(),
+    const todos: Todo[] = Array(6).fill(1).map((_, i) => {
+        return  {
+            id: new Date().getTime() + i,
             name: '',
             complete: false
-        },
-        {
-            id: new Date().getTime(),
-            name: '',
-            complete: false
-        },
-        {
-            id: new Date().getTime(),
-            name: '',
-            complete: false
-        },
-        {
-            id: new Date().getTime(),
-            name: '',
-            complete: false
-        },
-        {
-            id: new Date().getTime(),
-            name: '',
-            complete: false
-        },
-        {
-            id: new Date().getTime(),
-            name: '',
-            complete: false
-        },
-        {
-            id: new Date().getTime(),
-            name: '',
-            complete: false
-        }
-    ]
+        };
+    })
 
     return (
-        <Todos todos={todos} isLoading={true} />
+        <Todos todos={todos} isFetching={true} />
     );
 }
