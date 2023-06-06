@@ -3,9 +3,8 @@
 import { ChangeEvent, memo, useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import styles from './TodoCard.module.scss';
 import { Todo } from '@/types'
-import { classNames } from '@/utils';
+import { classNames, showSuccessToast, showErrorToast } from '@/utils';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
 
 const TodoCard: React.FC<{
     todo: Todo,
@@ -32,7 +31,7 @@ const TodoCard: React.FC<{
     const mutate = useCallback((message?: string) => {
         startTransition(() => {
             router.refresh();
-            message && toast(message);
+            message && showSuccessToast(message);
         });
     }, [startTransition, router]);
 
@@ -57,7 +56,7 @@ const TodoCard: React.FC<{
             mutate();
         } catch (e) {
             console.log(e);
-            toast('Failed to update todo.');
+            showErrorToast('Failed to update todo.');
         } finally {
             setLoading(false);
         }
@@ -76,7 +75,7 @@ const TodoCard: React.FC<{
             }
         } catch (e) {
             console.log(e);
-            toast('Failed to update todo.');
+            showErrorToast('Failed to update todo.');
         } finally {
             setLoading(false);
         }
@@ -89,7 +88,7 @@ const TodoCard: React.FC<{
             mutate('Todo deleted successfully.');
         } catch (e) {
             console.log(e);
-            toast('Failed to delete todo.');
+            showErrorToast('Failed to delete todo.');
         } finally {
             setLoading(false);
         }

@@ -3,7 +3,7 @@
 import React, { ChangeEvent, useCallback, useState, useTransition } from "react";
 import styles from './AddTodoForm.module.scss';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { showErrorToast, showSuccessToast } from "@/utils";
 
 
 const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<void> }> = ({ addTodo }) => {
@@ -21,10 +21,10 @@ const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<void> }> = ({
             setTodoName('');
             startTransition(() => {
                 router.refresh();
-                toast('New todo added successfully.');
+                showSuccessToast('New todo added successfully.');
             });
         } catch (e: any) {
-            toast('Failed to add the new todo.');
+            showErrorToast('Failed to add the new todo.');
         }
     }, [addTodo, router]);
 

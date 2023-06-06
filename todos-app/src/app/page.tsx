@@ -1,4 +1,5 @@
-import { fetchTodos, toggleTodo, deleteTodo, updateTodoName } from '@/services';
+import { fetchTodos } from '@/services';
+import { toggleTodo, deleteTodo, updateTodoName } from '@/actions';
 import Todos from '@/components/Todos';
 
 export default async function Home() {

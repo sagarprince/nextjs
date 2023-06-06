@@ -8,6 +8,12 @@
         "command": "nvm use 16.14.0 && cd todos-app && npm run dev"
       },
       {
+        "name": "Next.js: debug server-side windows",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": "cd todos-app; npm run dev"
+      },
+      {
         "name": "Next.js: debug client-side",
         "type": "chrome",
         "request": "launch",

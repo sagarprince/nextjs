@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
+html,
+body {
     height: 100%;
 }
 
@@ -17,7 +18,7 @@ main {
 }
 
 .shimmer-bg {
-    animation : shimmer 2s infinite linear;
+    animation: shimmer 2s infinite linear;
     background: linear-gradient(to right, #e5e5e5 4%, #dadada 25%, #eaeaea 36%);
     background-size: 1000px 100%;
 }
@@ -35,6 +36,7 @@ main {
     0% {
         background-position: -1000px 0;
     }
+
     100% {
         background-position: 1000px 0;
     }

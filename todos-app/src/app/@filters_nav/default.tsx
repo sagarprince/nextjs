@@ -1,3 +1,4 @@
+import ErrorBoundary from '@/components/ErrorBoundry';
 import FiltersNav from '@/components/FiltersNav';
 import { fetchTodosCount } from '@/services';
 import { Filter } from '@/types';
@@ -26,14 +27,15 @@ export default function FiltersNavigation() {
     ];
 
     return (
-        <Suspense fallback={<><FiltersNav filters={filters} /></>}>
-            {/* @ts-expect-error Async Server Component */}
-            <AsyncFiltersNav filters={filters} />
-        </Suspense>
+        <ErrorBoundary fallback={<FiltersNav filters={filters} />}>
+            <Suspense fallback={<FiltersNav filters={filters} />}>
+                {/* @ts-expect-error Async Server Component */}
+                <AsyncFiltersNav filters={filters} />
+            </Suspense>
+        </ErrorBoundary>
     );
 }
 
-// Albums Component
 async function AsyncFiltersNav({ filters }: { filters: Filter[] }) {
     const { allCount, activeCount, completedCount } = await fetchTodosCount();
 
@@ -43,12 +45,10 @@ async function AsyncFiltersNav({ filters }: { filters: Filter[] }) {
         3: completedCount
     };
 
-    const _filters = [...filters].map((filter) => {
-        filter.count = countMap[filter.key];
-        return filter;
-    });
-
     return (
-        <FiltersNav filters={_filters} />
+        <FiltersNav filters={[...filters].map((filter) => {
+            filter.count = countMap[filter.key];
+            return filter;
+        })} />
     );
 }

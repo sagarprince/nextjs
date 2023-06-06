@@ -1,10 +1,10 @@
-import './globals.css';
+import './globals.scss';
 // import { Poppins } from 'next/font/google';
 import localFont from 'next/font/local';
 import React from 'react';
 import Header from '@/components/Header';
 import { AppProvider } from '@/contexts/AppContext';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from 'sonner';
 
 // const poppins = Poppins({
 //     weight: ['300', '400', '500', '600'],
@@ -53,7 +53,7 @@ export default function RootLayout(props: {
                             {props.children}
                         </main>
                     </section>
-                    <Toaster toastOptions={{ position: "bottom-right" }} />
+                    <Toaster position="bottom-right" />
                 </AppProvider>
             </body>
         </html>

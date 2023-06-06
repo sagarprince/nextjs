@@ -8,15 +8,14 @@ export async function fetchTodos({ status = '' }: { status?: string }): Promise<
         params['status'] = status;
     }
 
-    const response = await customFetch('todos', params, {
+    const response = await customFetch('todos', {
         next: {
             tags: ['todos'],
             revalidate: 0
-        }
-    });
+        },
+    }, params);
 
     if (!response.ok) {
-        // This will activate the closest `error.js` Error Boundary
         throw new Error('Failed to fetch todos.');
     }
 
@@ -24,12 +23,11 @@ export async function fetchTodos({ status = '' }: { status?: string }): Promise<
 }
 
 export async function fetchTodosCount(): Promise<any> {
-    const response = await customFetch('todos/count', {}, {
+    const response = await customFetch('todos/count', {
         cache: "no-cache",
     });
 
     if (!response.ok) {
-        // This will activate the closest `error.js` Error Boundary
         throw new Error('Failed to fetch todos count.');
     }
     
@@ -37,7 +35,7 @@ export async function fetchTodosCount(): Promise<any> {
 }
 
 export async function addNewTodo({ todoName }: { todoName: string }): Promise<any> {
-    const response = await customFetch('todos', {}, {
+    const response = await customFetch('todos', {
         method: 'POST',
         body: JSON.stringify({
             todoName
@@ -47,8 +45,6 @@ export async function addNewTodo({ todoName }: { todoName: string }): Promise<an
     if (!response.ok) {
         throw new Error('Error while adding todo.');
     }
-
-    // revalidateTag('todos');
 
     return await response.json();
 }
@@ -66,41 +62,17 @@ export async function updateTodo({ id, ...rest }: { id: string, [key: string]: a
         throw new Error('Error while updating todo.');
     }
 
-    // revalidateTag('todos');
-
     return await response.json();
 }
 
-export async function toggleTodo(id: string, complete: boolean): Promise<any> {
-    "use server"
-
-    return await updateTodo({
-        id,
-        complete
-    });
-}
-
-export async function updateTodoName(id: string, name: string): Promise<any> {
-    "use server"
-
-    return await updateTodo({
-        id,
-        name
-    });
-}
-
-export async function deleteTodo(id: string): Promise<any> {
-    "use server"
-
-    const response = await customFetch('todos', { id }, {
+export async function deleteTodoById(id: string): Promise<any> {
+    const response = await customFetch('todos', {
         method: 'DELETE'
-    });
+    }, { id });
 
     if (!response.ok) {
         throw new Error('Error while deleting todo.');
     }
-
-    // revalidateTag('todos');
 
     return await response.json();
 }
