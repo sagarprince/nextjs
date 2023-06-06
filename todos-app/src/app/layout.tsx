@@ -4,7 +4,7 @@ import localFont from 'next/font/local';
 import React from 'react';
 import Header from '@/components/Header';
 import { AppProvider } from '@/contexts/AppContext';
-import { Toaster } from 'sonner';
+import { Toaster } from '@/components/Toaster';
 
 // const poppins = Poppins({
 //     weight: ['300', '400', '500', '600'],
@@ -53,7 +53,7 @@ export default function RootLayout(props: {
                             {props.children}
                         </main>
                     </section>
-                    <Toaster position="bottom-right" />
+                    <Toaster position="bottom-right" richColors />
                 </AppProvider>
             </body>
         </html>

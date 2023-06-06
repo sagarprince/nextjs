@@ -10,18 +10,20 @@ const Todos: React.FC<{
     deleteTodo?: (id: string) => Promise<void>
 }> = ({ todos, isFetching, toggleTodo, updateTodo, deleteTodo }) => {
     return (
-        <ul className={styles.todos}>
-            {todos.map((todo) => {
-                return <li key={todo.id}>
-                    <TodoCard
-                        todo={todo}
-                        isFetching={isFetching}
-                        toggleTodo={toggleTodo}
-                        updateTodo={updateTodo}
-                        deleteTodo={deleteTodo} />
-                </li>
-            })}
-        </ul>
+        <>
+            <ul className={styles.todos}>
+                {todos.map((todo) => {
+                    return <li key={todo.id}>
+                        <TodoCard
+                            todo={todo}
+                            isFetching={isFetching}
+                            toggleTodo={toggleTodo}
+                            updateTodo={updateTodo}
+                            deleteTodo={deleteTodo} />
+                    </li>
+                })}
+            </ul>
+        </>
     );
 }
 

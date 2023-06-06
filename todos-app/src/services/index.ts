@@ -50,7 +50,7 @@ export async function addNewTodo({ todoName }: { todoName: string }): Promise<an
 }
 
 export async function updateTodo({ id, ...rest }: { id: string, [key: string]: any }) {
-    const response = await customFetch('todos', {}, {
+    const response = await customFetch('todos', {
         method: 'PUT',
         body: JSON.stringify({
             id,
