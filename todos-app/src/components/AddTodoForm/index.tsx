@@ -1,14 +1,23 @@
 "use client"
 
-import React, { ChangeEvent, useCallback, useState, useTransition } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useState, useTransition } from "react";
 import styles from './AddTodoForm.module.scss';
 import { useRouter } from 'next/navigation';
-import { showSuccessToast, showErrorToast } from "@/utils/helpers";
+import { showErrorToast } from "@/utils/helpers";
+import { SET_TOAST_MESSAGE, UPDATE_TOAST_PENDING_STATUS } from '@/contexts/AppContext';
+import { useAppDispatch } from '@/hooks/useApp';
+import { Todo } from "@/types";
 
-const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<void> }> = ({ addTodo }) => {
-    const [todoName, setTodoName] = useState('');
-    const [isPending, startTransition] = useTransition();
+const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<any> }> = ({ addTodo }) => {
     const router = useRouter();
+
+    const [todoName, setTodoName] = useState('');
+
+    const [isLoading, setLoading] = useState(false);
+    const [isPending, startTransition] = useTransition();
+    const [_, startDispatchTransition] = useTransition();
+
+    const dispatch = useAppDispatch();
 
     const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setTodoName(event.target.value);
@@ -16,19 +25,34 @@ const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<void> }> = ({
 
     const onAddTodo = useCallback(async (data: FormData) => {
         try {
-            await addTodo(data);
-            setTodoName('');
+            const { todo }: { todo: Todo } = await addTodo(data);
+            dispatch({
+                type: SET_TOAST_MESSAGE, toastMessage: {
+                    id: todo.id,
+                    message: 'New todo added successfully.',
+                    isPending: true
+                }
+            });
             startTransition(() => {
                 router.refresh();
-                showSuccessToast('New todo added successfully.');
+                startDispatchTransition(() => {
+                    setTodoName('');
+                    dispatch({ type: UPDATE_TOAST_PENDING_STATUS, id: todo.id, isPending: false });
+                });
             });
         } catch (e: any) {
             showErrorToast('Failed to add the new todo.');
+        } finally {
+            setLoading(false);
         }
-    }, [addTodo, router]);
+    }, [addTodo, setLoading, router]);
+
+    const onSubmit = useCallback(() => {
+        setLoading(true);
+    }, [setLoading]);
 
     return (
-        <form action={onAddTodo} className={styles.add_todo_form}>
+        <form action={onAddTodo} onSubmit={onSubmit} className={styles.add_todo_form}>
             <input
                 type="text"
                 name='name'
@@ -38,7 +62,7 @@ const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<void> }> = ({
                 onChange={handleChange}
                 autoComplete='off'
             />
-            <button type="submit" disabled={!todoName || isPending}
+            <button type="submit" disabled={!todoName || isLoading || isPending}
                 className="btn btn-active btn-accent w-64 rounded-full">Add</button>
         </form>
     );

@@ -3,11 +3,10 @@
 import { ChangeEvent, memo, useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import styles from './TodoCard.module.scss';
 import { Todo } from '@/types'
-import { classNames, showSuccessToast, showErrorToast } from '@/utils/helpers';
-import { usePathname, useRouter } from 'next/navigation';
-import { useApp, useAppDispatch } from '@/hooks/useApp';
-import { SET_TOAST_MESSAGE, UPDATE_TOAST_MESSAGE, UPDATE_TOAST_PENDING_STATUS } from '@/contexts/AppContext';
-import { toast } from '../Toaster';
+import { classNames, showErrorToast } from '@/utils/helpers';
+import { useRouter } from 'next/navigation';
+import { SET_TOAST_MESSAGE, UPDATE_TOAST_PENDING_STATUS } from '@/contexts/AppContext';
+import { useAppDispatch } from '@/hooks/useApp';
 
 const TodoCard: React.FC<{
     todo: Todo,
@@ -26,8 +25,8 @@ const TodoCard: React.FC<{
 
     const [isMutationPending, startMutateTransition] = useTransition();
     const [isServerActionPending, startServerActionTransition] = useTransition();
+    const [_, startDispatchTransition] = useTransition();
 
-    const { toastMessages } = useApp();
     const dispatch = useAppDispatch();
 
     const router = useRouter();
@@ -36,13 +35,6 @@ const TodoCard: React.FC<{
         setTodoName(todo.name);
         setCompleted(todo.complete);
     }, [todo]);
-
-    useEffect(() => {
-        console.log('isMutationPending ', isMutationPending);
-        if (!isMutationPending) {
-            dispatch({ type: UPDATE_TOAST_PENDING_STATUS, id: todo.id, isPending: false });
-        }
-    }, [isMutationPending, dispatch, todo.id]);
 
     const mutate = useCallback((message?: string, callback?: () => void) => {
         callback && callback();
@@ -55,7 +47,9 @@ const TodoCard: React.FC<{
         });
         startMutateTransition(() => {
             router.refresh();
-            // message && showSuccessToast(message);
+            startDispatchTransition(() => {
+                dispatch({ type: UPDATE_TOAST_PENDING_STATUS, id: todo.id, isPending: false });
+            })
         });
     }, [startMutateTransition, router, todo.id]);
 

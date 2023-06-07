@@ -5,6 +5,7 @@ import React from 'react';
 import Header from '@/components/Header';
 import { AppProvider } from '@/contexts/AppContext';
 import { Toaster } from '@/components/Toaster';
+import { useApp } from '@/hooks/useApp';
 
 // const poppins = Poppins({
 //     weight: ['300', '400', '500', '600'],
@@ -40,11 +41,13 @@ export default function RootLayout(props: {
     filters_nav: React.ReactNode,
     children: React.ReactNode
 }) {
+    // const state = useApp();
+
     return (
-        <html lang="en" data-theme="light">
+        <html lang="en">
             <body className={myFont.className} suppressHydrationWarning={true}>
                 <AppProvider>
-                    <section className='App'>
+                    <section className='App' data-theme="light">
                         <Header>
                             {props.add_todo_form}
                             {props.filters_nav}

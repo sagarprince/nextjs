@@ -2,7 +2,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: #f4f6f7;
+    background-color: hsl(var(--b3) / var(--tw-bg-opacity, 1));
     padding: 10px 15px;
     border-radius: 10px;
     height: 100%;
@@ -22,7 +22,7 @@
 
         &__text {
             font-weight: 500;
-            color: #3b3b3b;
+            color: hsl(var(--bc) / var(--tw-text-opacity, 1));
     
             &.completed {
                 text-decoration: line-through;

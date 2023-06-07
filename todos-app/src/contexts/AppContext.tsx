@@ -1,13 +1,15 @@
 "use client"
 
 import { showSuccessToast } from '@/utils/helpers';
-import { ReactNode, createContext, useEffect, useMemo, useReducer } from 'react';
+import { ReactNode, createContext, useCallback, useEffect, useMemo, useReducer } from 'react';
 
+export const SET_DARK_MODE = 'SET_DARK_MODE';
 export const SET_TOAST_MESSAGE = 'SET_TOAST_MESSAGE';
 export const UPDATE_TOAST_PENDING_STATUS = 'UPDATE_TOAST_PENDING_STATUS';
 export const REMOVE_TOAST_MESSAGE = 'REMOVE_TOAST_MESSAGE';
 
 export interface AppContextType {
+    isDarkMode: boolean;
     toastMessages: Array<{
         id: any;
         message: string,
@@ -20,6 +22,11 @@ export const AppDispatchContext = createContext<any>(null);
 
 const reducer = (state: AppContextType, action: any) => {
     switch (action.type) {
+        case SET_DARK_MODE:
+            return {
+                ...state,
+                isDarkMode: action.isDarkMode
+            };
         case SET_TOAST_MESSAGE:
             return {
                 ...state,
@@ -46,6 +53,7 @@ const reducer = (state: AppContextType, action: any) => {
 };
 
 const initialState: AppContextType = {
+    isDarkMode: false,
     toastMessages: [],
 };
 
@@ -55,21 +63,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const { toastMessages } = state;
 
+    const removeToastMessage = useCallback((id: any) => {
+        dispatch({ type: REMOVE_TOAST_MESSAGE, id });
+    }, [dispatch]);
+
     useEffect(() => {
-        console.log(toastMessages);
         toastMessages.forEach((tm) => {
-            !tm.isPending && showSuccessToast(tm.message, {
-                onDismiss: () => {
-                    console.log('closed');
-                    dispatch({ type: REMOVE_TOAST_MESSAGE, id: tm.id });
-                },
-                onAutoClose: () => {
-                    console.log('closed');
-                    dispatch({ type: REMOVE_TOAST_MESSAGE, id: tm.id });
-                }
-            });
+            if (!tm.isPending) {
+                removeToastMessage(tm.id);
+                showSuccessToast(tm.message);
+            }
         })
-    }, [toastMessages]);
+    }, [toastMessages, removeToastMessage, showSuccessToast]);
 
     const value = useMemo(
         () => ({

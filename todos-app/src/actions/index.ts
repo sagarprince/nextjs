@@ -8,7 +8,7 @@ export async function addTodo(data: FormData) {
         throw new Error('Please enter a todo name.');
     }
 
-    await addNewTodo({ todoName });
+    return await addNewTodo({ todoName });
 }
 
 export async function toggleTodo(id: string, complete: boolean): Promise<any> {
