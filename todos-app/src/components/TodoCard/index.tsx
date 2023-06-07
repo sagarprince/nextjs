@@ -3,7 +3,7 @@
 import { ChangeEvent, memo, useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import styles from './TodoCard.module.scss';
 import { Todo } from '@/types'
-import { classNames, showSuccessToast, showErrorToast } from '@/utils';
+import { classNames, showSuccessToast, showErrorToast } from '@/utils/helpers';
 import { useRouter } from 'next/navigation';
 
 const TodoCard: React.FC<{
@@ -20,7 +20,11 @@ const TodoCard: React.FC<{
     const [isLoading, setLoading] = useState(false);
 
     const inputRef: any = useRef(null);
-    const [isPending, startTransition] = useTransition();
+    const [mutatingTodoId, setMutatingTodoId] = useState();
+
+    const [isMutationPending, startMutateTransition] = useTransition();
+    const [isServerActionPending, startServerActionTransition] = useTransition();
+
     const router = useRouter();
 
     useEffect(() => {
@@ -28,18 +32,27 @@ const TodoCard: React.FC<{
         setCompleted(todo.complete);
     }, [todo]);
 
-    const mutate = useCallback((message?: string) => {
-        startTransition(() => {
+    useEffect(() => {
+        console.log('isMutationPending ', isMutationPending, mutatingTodoId);
+        if (mutatingTodoId === todo.id && !isMutationPending) {
+            console.log('Show Message');
+            // setMutatingTodoId(undefined);
+        }
+    }, [isMutationPending, mutatingTodoId, todo.id]);
+
+    const mutate = useCallback((message?: string, callback?: () => void) => {
+        startMutateTransition(() => {
+            callback && callback();
             router.refresh();
             message && showSuccessToast(message);
         });
-    }, [startTransition, router]);
+    }, [startMutateTransition, router]);
 
     const handleClickOutside = useCallback((event: any) => {
-        if ((!isLoading || !isPending) && inputRef.current && !inputRef.current.contains(event.target)) {
+        if ((!isLoading || !isMutationPending || !isServerActionPending) && inputRef.current && !inputRef.current.contains(event.target)) {
             setEditable(false);
         }
-    }, [isLoading, isPending]);
+    }, [isLoading, isMutationPending, isServerActionPending]);
 
     useEffect(() => {
         document.addEventListener('click', handleClickOutside);
@@ -52,8 +65,10 @@ const TodoCard: React.FC<{
         try {
             setCompleted(e.target.checked);
             setLoading(true);
-            toggleTodo && await toggleTodo(todo.id, e.target.checked);
-            mutate();
+            startServerActionTransition(async () => {
+                toggleTodo && await toggleTodo(todo.id, e.target.checked);
+                mutate();
+            });
         } catch (e) {
             console.log(e);
             showErrorToast('Failed to update todo.');
@@ -64,11 +79,16 @@ const TodoCard: React.FC<{
 
     const onUpdateTodo = useCallback(async (data: FormData) => {
         try {
-            const todoName: any = data.get('name') ?.valueOf();
+            const todoName: any = data.get('name')?.valueOf();
             if (todoName) {
                 setLoading(true);
-                updateTodo && await updateTodo(todo.id, todoName);
-                mutate('Todo updated successfully.');
+                setMutatingTodoId(todo.id);
+                startServerActionTransition(async () => {
+                    updateTodo && await updateTodo(todo.id, todoName);
+                    mutate('Todo updated successfully.', () => {
+                        setEditable(false);
+                    });
+                });
             } else {
                 setEditable(false);
                 setTodoName(todo.name);
@@ -84,8 +104,11 @@ const TodoCard: React.FC<{
     const onDeleteTodo = useCallback(async () => {
         try {
             setLoading(true);
-            deleteTodo && await deleteTodo(todo.id);
-            mutate('Todo deleted successfully.');
+            setMutatingTodoId(todo.id);
+            startServerActionTransition(async () => {
+                deleteTodo && await deleteTodo(todo.id);
+                mutate('Todo deleted successfully.');
+            });
         } catch (e) {
             console.log(e);
             showErrorToast('Failed to delete todo.');
@@ -97,7 +120,9 @@ const TodoCard: React.FC<{
     // console.log('Todo Card ', todo.id);
 
     return (
-        <div className={styles.todo_card} style={{ opacity: isPending || isLoading ? 0.6 : 1}}>
+        <div className={styles.todo_card} style={{
+            opacity: isServerActionPending || isMutationPending || isLoading ? 0.6 : 1
+        }}>
             <div className={styles.todo_card__item}>
                 <input
                     type="checkbox"
@@ -117,6 +142,7 @@ const TodoCard: React.FC<{
                     value={todoName}
                     name='name'
                     className={styles.editable_input}
+                    autoComplete='off'
                     onChange={(e) => {
                         setTodoName(e.target.value)
                     }} /></form>}

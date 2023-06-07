@@ -1,6 +1,4 @@
-import { customFetch } from '@/lib/fetch';
-import { Todo } from '@/types';
-import { revalidateTag } from 'next/cache';
+import { customFetch } from '@/utils/custom_fetch';
 
 export async function fetchTodos({ status = '' }: { status?: string }): Promise<any> {
     const params: any = {};

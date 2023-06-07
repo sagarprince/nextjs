@@ -2,6 +2,7 @@
 
 import React, { ReactNode, useCallback, useEffect, useRef } from "react";
 import styles from './Header.module.scss';
+import { debounce } from "@/utils/helpers";
 
 const Header: React.FC<{ children: ReactNode}> = ({ children }) => {
     const headerRef = useRef<HTMLInputElement>(null);

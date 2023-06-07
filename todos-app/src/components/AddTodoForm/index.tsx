@@ -3,8 +3,7 @@
 import React, { ChangeEvent, useCallback, useState, useTransition } from "react";
 import styles from './AddTodoForm.module.scss';
 import { useRouter } from 'next/navigation';
-import { showErrorToast, showSuccessToast } from "@/utils";
-
+import { showSuccessToast, showErrorToast } from "@/utils/helpers";
 
 const AddTodoForm: React.FC<{ addTodo: (data: FormData) => Promise<void> }> = ({ addTodo }) => {
     const [todoName, setTodoName] = useState('');
