@@ -1,8 +1,8 @@
 "use client"
 
-import React, { Fragment, useCallback, useEffect, useRef, useTransition } from 'react';
+import React, { Fragment, useCallback, useRef, useTransition } from 'react';
 import styles from './FiltersNav.module.scss';
-import { classNames, dismissToast, showToast } from '@/utils/helpers';
+import { classNames, showToast } from '@/utils/helpers';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Filter } from '@/types';
@@ -14,7 +14,9 @@ const FiltersNav: React.FC<{ filters: Filter[] }> = ({ filters }) => {
     const networkSpeed = useNetworkSpeed();
     const [isPending, startTransition] = useTransition();
 
-    let loadingToastId: React.MutableRefObject<number | string | undefined> = useRef();
+    // let loadingToastId: React.MutableRefObject<number | string | undefined> = useRef();
+
+    let navigatingRoute: React.MutableRefObject<string | undefined> = useRef();
 
     const handleClick = useCallback((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, path: string) => {
         e.preventDefault();
@@ -23,25 +25,26 @@ const FiltersNav: React.FC<{ filters: Filter[] }> = ({ filters }) => {
                 showToast('Please check your internet connection.');
             } else {
                 startTransition(() => {
+                    navigatingRoute.current = path;
                     router.push(path);
                 });
             }
         }
     }, [router, networkSpeed, isPending]);
 
-    useEffect(() => {
-        console.log('isPending ', isPending);
-        if (isPending) {
-            loadingToastId.current = showToast('Loading...', {
-                duration: Infinity,
-            });
-        } else {
-            loadingToastId.current && dismissToast(loadingToastId.current);
-        }
-    }, [isPending, loadingToastId]);
+    // useEffect(() => {
+    //     console.log('isPending ', isPending);
+    //     if (isPending) {
+    //         loadingToastId.current = showToast('Loading...', {
+    //             duration: Infinity,
+    //         });
+    //     } else {
+    //         loadingToastId.current && dismissToast(loadingToastId.current);
+    //     }
+    // }, [isPending, loadingToastId]);
 
     return (
-        <div className={classNames('tabs tabs-boxed', styles.filters)} style={{ opacity: isPending ? 0.75 : 1 }}>
+        <div className={classNames('tabs tabs-boxed', styles.filters)}>
             {filters.map((filter) => {
                 const isActive = pathName.endsWith(filter.path);
                 return (
@@ -49,7 +52,7 @@ const FiltersNav: React.FC<{ filters: Filter[] }> = ({ filters }) => {
                         <Link
                             href={filter.path}
                             prefetch={true}
-                            className={`tab${(isActive ? ' tab-active' : '')}`}
+                            className={classNames('tab', isActive ? 'tab-active' : '', isPending && navigatingRoute.current === filter.path ? 'tab-disabled' : '')}
                             onClick={(e) => handleClick(e, filter.path)}>
                             {filter.label} ({filter.count || 0})
                         </Link>

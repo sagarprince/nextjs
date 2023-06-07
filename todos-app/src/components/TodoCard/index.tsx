@@ -4,7 +4,10 @@ import { ChangeEvent, memo, useCallback, useEffect, useRef, useState, useTransit
 import styles from './TodoCard.module.scss';
 import { Todo } from '@/types'
 import { classNames, showSuccessToast, showErrorToast } from '@/utils/helpers';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useApp, useAppDispatch } from '@/hooks/useApp';
+import { SET_TOAST_MESSAGE, UPDATE_TOAST_MESSAGE, UPDATE_TOAST_PENDING_STATUS } from '@/contexts/AppContext';
+import { toast } from '../Toaster';
 
 const TodoCard: React.FC<{
     todo: Todo,
@@ -20,10 +23,12 @@ const TodoCard: React.FC<{
     const [isLoading, setLoading] = useState(false);
 
     const inputRef: any = useRef(null);
-    const [mutatingTodoId, setMutatingTodoId] = useState();
 
     const [isMutationPending, startMutateTransition] = useTransition();
     const [isServerActionPending, startServerActionTransition] = useTransition();
+
+    const { toastMessages } = useApp();
+    const dispatch = useAppDispatch();
 
     const router = useRouter();
 
@@ -33,20 +38,26 @@ const TodoCard: React.FC<{
     }, [todo]);
 
     useEffect(() => {
-        console.log('isMutationPending ', isMutationPending, mutatingTodoId);
-        if (mutatingTodoId === todo.id && !isMutationPending) {
-            console.log('Show Message');
-            // setMutatingTodoId(undefined);
+        console.log('isMutationPending ', isMutationPending);
+        if (!isMutationPending) {
+            dispatch({ type: UPDATE_TOAST_PENDING_STATUS, id: todo.id, isPending: false });
         }
-    }, [isMutationPending, mutatingTodoId, todo.id]);
+    }, [isMutationPending, dispatch, todo.id]);
 
     const mutate = useCallback((message?: string, callback?: () => void) => {
-        startMutateTransition(() => {
-            callback && callback();
-            router.refresh();
-            message && showSuccessToast(message);
+        callback && callback();
+        dispatch({
+            type: SET_TOAST_MESSAGE, toastMessage: {
+                id: todo.id,
+                message: message,
+                isPending: true
+            }
         });
-    }, [startMutateTransition, router]);
+        startMutateTransition(() => {
+            router.refresh();
+            // message && showSuccessToast(message);
+        });
+    }, [startMutateTransition, router, todo.id]);
 
     const handleClickOutside = useCallback((event: any) => {
         if ((!isLoading || !isMutationPending || !isServerActionPending) && inputRef.current && !inputRef.current.contains(event.target)) {
@@ -82,7 +93,6 @@ const TodoCard: React.FC<{
             const todoName: any = data.get('name')?.valueOf();
             if (todoName) {
                 setLoading(true);
-                setMutatingTodoId(todo.id);
                 startServerActionTransition(async () => {
                     updateTodo && await updateTodo(todo.id, todoName);
                     mutate('Todo updated successfully.', () => {
@@ -104,7 +114,6 @@ const TodoCard: React.FC<{
     const onDeleteTodo = useCallback(async () => {
         try {
             setLoading(true);
-            setMutatingTodoId(todo.id);
             startServerActionTransition(async () => {
                 deleteTodo && await deleteTodo(todo.id);
                 mutate('Todo deleted successfully.');
@@ -133,7 +142,7 @@ const TodoCard: React.FC<{
                 {!isEditable && <span
                     className={classNames(styles.todo_card__item__text, (todo.complete || isCompleted) && styles.completed)}
                     onDoubleClick={() => setEditable(!isEditable)}>
-                    {todo.name}
+                    {todoName || todo.name}
                 </span>}
                 {isFetching && <span className={classNames('shimmer-bg', styles.todo_card__item__text_loading)}></span>}
                 {isEditable && <form action={onUpdateTodo}><input

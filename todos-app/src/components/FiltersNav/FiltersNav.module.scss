@@ -2,4 +2,12 @@
     margin-top: 20px;
     display: flex;
     justify-content: center;
+
+    .route_loading {
+        opacity: 0.5;
+        
+        &:hover {
+            opacity: inherit;
+        }
+    }
 }
